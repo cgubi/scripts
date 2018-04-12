@@ -608,6 +608,7 @@ check_domain_status()
            DOMAINDATE=`echo "${tday}-${tmonth}-${tyear}"`
     elif [ "${TLDTYPE}" == "it" ];
     then
+	   STATUS=`cat ${WHOIS_TMP} | awk '/Status:/ { print $NF }'`
            tdomdate=`cat ${WHOIS_TMP} | ${AWK} '/Expire Date:/ { print $NF }'`
            tyear=`echo ${tdomdate} | ${CUT} -d'-' -f1`
            tmon=`echo ${tdomdate} |${CUT} -d'-' -f2`
@@ -718,7 +719,12 @@ check_domain_status()
                 echo "The domain ${DOMAIN} has expired!" \
                 | ${MAIL} -s "Domain ${DOMAIN} has expired!" ${ADMIN}
            fi
-	echo "Il dominio ${DOMAIN} e' scaduto!\n"
+	AUTORENEW=$(echo $STATUS | grep -i autorenew)
+	if [[ ! -z $AUTORENEW ]]; then
+    	    echo "Il dominio ${DOMAIN} e' scaduto ma in fase di rinnovo con $REGISTRAR\n"
+	else
+	    echo "Il dominio ${DOMAIN} e' scaduto!\n"
+	fi
 
     elif [ ${DOMAINDIFF} -lt ${WARNDAYS} ]
     then
